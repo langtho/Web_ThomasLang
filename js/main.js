@@ -14,7 +14,13 @@ window.onload = async function init() {
         $buttoncontainer: document.querySelector('#buttonContainer'),
         $presetSelect: document.querySelector('#presetSelect'),
         $loadKitButton: document.querySelector('#loadKitButton'),
-        $appTitle: document.querySelector('#app-title')
+        $appTitle: document.querySelector('#app-title'),
+
+        $recordButton : document.querySelector('#recordButton'),
+        $stopButton : document.querySelector('#stopButton'),
+        $playRecordedButton : document.querySelector('#playRecordedButton'),
+        $addRecordedButton : document.querySelector('#addRecordedButton'),
+        $recordStatus : document.querySelector('#recordStatus')
     };
 
     // Check if any necessary elements are missing

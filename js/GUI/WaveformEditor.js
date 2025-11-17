@@ -1,5 +1,3 @@
-// WaveformEditor.js
-
 import WaveformDrawer from './waveformdrawer.js';
 import TrimbarsDrawer from './trimbarsdrawer.js';
 import { pixelToSeconds ,secondsToPixel} from '../Engine/utils.js';
@@ -21,10 +19,12 @@ export default class WaveformEditor {
 
 
     selectSample(sample) {
-        
-        if (this.currentSample) {
-            this.currentSample.trimStart = pixelToSeconds(this.trimbarsDrawer.leftTrimBar.x, 1, this.canvas.width);
-            this.currentSample.trimEnd = pixelToSeconds(this.trimbarsDrawer.rightTrimBar.x, 1, this.canvas.width);
+        const CANVAS_WIDTH = this.canvas.width;
+
+        if (this.currentSample && this.currentSample.buffer) {
+            const duration = this.currentSample.buffer.duration;
+            this.currentSample.trimStart = pixelToSeconds(this.trimbarsDrawer.leftTrimBar.x, duration, CANVAS_WIDTH);
+            this.currentSample.trimEnd = pixelToSeconds(this.trimbarsDrawer.rightTrimBar.x, duration, CANVAS_WIDTH);
         }
         
       
@@ -34,9 +34,13 @@ export default class WaveformEditor {
         
         console.log("WaveformEditor: Displaying sample:", this.currentSample.name);
 
-       
-        this.trimbarsDrawer.leftTrimBar.x = secondsToPixel(this.currentSample.trimStart, 1, this.canvas.width);
-        this.trimbarsDrawer.rightTrimBar.x = secondsToPixel(this.currentSample.trimEnd, 1, this.canvas.width);
+        const duration = this.currentSample.buffer.duration;
+        
+        this.trimbarsDrawer.leftTrimBar.x = secondsToPixel(this.currentSample.trimStart, duration, CANVAS_WIDTH);
+        
+        let rightPixel = secondsToPixel(this.currentSample.trimEnd, duration, CANVAS_WIDTH);
+        this.trimbarsDrawer.rightTrimBar.x = Math.min(rightPixel, CANVAS_WIDTH);
+        
         this.waveformDrawer.init(this.currentSample.buffer, this.canvas, '#83E83E');
         this.waveformDrawer.drawWave(0, this.canvas.height);
         this.playCallback(this.currentSample);
@@ -53,10 +57,10 @@ export default class WaveformEditor {
             
             this.trimbarsDrawer.moveTrimBars(this.mousePos);
            
-            if (this.currentSample && this.trimbarsDrawer.isDragging) {
-                // Update trim values (in seconds) in the SoundSample instance
-                this.currentSample.trimStart = pixelToSeconds(this.trimbarsDrawer.leftTrimBar.x, 1, CANVAS_WIDTH);
-                this.currentSample.trimEnd = pixelToSeconds(this.trimbarsDrawer.rightTrimBar.x, 1, CANVAS_WIDTH);
+            if (this.currentSample && this.trimbarsDrawer.isDragging && this.currentSample.buffer) {
+                const duration = this.currentSample.buffer.duration;
+                this.currentSample.trimStart = pixelToSeconds(this.trimbarsDrawer.leftTrimBar.x, duration, CANVAS_WIDTH);
+                this.currentSample.trimEnd = pixelToSeconds(this.trimbarsDrawer.rightTrimBar.x, duration, CANVAS_WIDTH);
             }
         }
 
@@ -72,7 +76,6 @@ export default class WaveformEditor {
         }
     }
 
-    // Corresponds to your old animate function
     startAnimationLoop() {
         const animate = () => {
             this.trimbarsDrawer.clear();
@@ -82,7 +85,6 @@ export default class WaveformEditor {
         requestAnimationFrame(animate);
     }
 
-    // Public getter for the current sample
     getCurrentSample() {
         return this.currentSample;
     }
